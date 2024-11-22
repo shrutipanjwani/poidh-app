@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import React from 'react';
 
-import Wrapper from '@/components/global/Wrapper';
 import { Netname } from '@/utils/types';
 
 type Props = {
@@ -26,5 +25,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function Layout({ children }: Props) {
-  return <Wrapper>{children}</Wrapper>;
+  return children;
 }
