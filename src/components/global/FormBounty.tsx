@@ -20,6 +20,7 @@ import { trpcClient } from '@/trpc/client';
 import GameButton from '@/components/global/GameButton';
 import ButtonCTA from '@/components/ui/ButtonCTA';
 import { InfoIcon } from '@/components/global/Icons';
+import { Dialog as AIDialog } from '@mui/material';
 
 export default function FormBounty({
   open,
@@ -38,6 +39,8 @@ export default function FormBounty({
   const account = useAccount();
   const switctChain = useSwitchChain();
   const router = useRouter();
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiIdea, setAiIdea] = useState('');
 
   const createBountyMutations = useMutation({
     mutationFn: async () => {
@@ -107,8 +110,78 @@ export default function FormBounty({
     },
   });
 
+  const generateWithAI = useMutation({
+    mutationFn: async (idea: string) => {
+      const response = await fetch('/api/generate-bounty', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate bounty');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setName(data.title);
+      setDescription(data.description);
+      setAiDialogOpen(false);
+      setAiIdea('');
+    },
+    onError: (error) => {
+      toast.error('Failed to generate bounty: ' + error.message);
+    },
+  });
+
+  const aiDialog = (
+    <AIDialog
+      open={aiDialogOpen}
+      onClose={() => setAiDialogOpen(false)}
+      maxWidth='xs'
+      fullWidth
+      PaperProps={{
+        className: 'bg-poidhBlue/90',
+        style: {
+          borderRadius: '30px',
+          color: 'white',
+          border: '1px solid #D1ECFF',
+        },
+      }}
+    >
+      <DialogContent>
+        <Box display='flex' flexDirection='column' width='100%' gap={2}>
+          <span>What's your bounty idea?</span>
+          <textarea
+            rows={3}
+            value={aiIdea}
+            onChange={(e) => setAiIdea(e.target.value)}
+            className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
+            placeholder='e.g., Take a photo proving you climbed Mount Everest'
+          />
+          <div className='flex gap-2'>
+            <button
+              className='flex-1'
+              onClick={() => generateWithAI.mutate(aiIdea)}
+              disabled={!aiIdea || generateWithAI.isPending}
+            >
+              <ButtonCTA>
+                {generateWithAI.isPending ? 'Generating...' : 'Generate'}
+              </ButtonCTA>
+            </button>
+            <button onClick={() => setAiDialogOpen(false)}>
+              <ButtonCTA>Cancel</ButtonCTA>
+            </button>
+          </div>
+        </Box>
+      </DialogContent>
+    </AIDialog>
+  );
+
   return (
     <>
+      {aiDialog}
       <Loading open={createBountyMutations.isPending} status={status} />
       <Dialog
         open={open}
@@ -129,7 +202,15 @@ export default function FormBounty({
       >
         <DialogContent>
           <Box display='flex' flexDirection='column' width='100%'>
-            <span>title</span>
+            <div className='flex justify-between items-center mb-2'>
+              <span>title</span>
+              <button
+                onClick={() => setAiDialogOpen(true)}
+                className='text-sm text-blue-300 hover:text-blue-400'
+              >
+                <ButtonCTA>Generate with AI</ButtonCTA>
+              </button>
+            </div>
             <input
               type='text'
               value={name}
