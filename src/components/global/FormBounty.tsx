@@ -157,8 +157,8 @@ export default function FormBounty({
             rows={3}
             value={aiIdea}
             onChange={(e) => setAiIdea(e.target.value)}
-            className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4'
-            placeholder='e.g., Take a photo proving you climbed Mount Everest'
+            className='border bg-transparent border-[#D1ECFF] py-2 px-2 rounded-md mb-4 placeholder:text-gray-300'
+            placeholder='eg: Take a photo proving you climbed Mount Everest'
           />
           <div className='flex gap-2'>
             <button
@@ -204,10 +204,7 @@ export default function FormBounty({
           <Box display='flex' flexDirection='column' width='100%'>
             <div className='flex justify-between items-center mb-2'>
               <span>title</span>
-              <button
-                onClick={() => setAiDialogOpen(true)}
-                className='text-sm text-blue-300 hover:text-blue-400'
-              >
+              <button onClick={() => setAiDialogOpen(true)} className='text-sm'>
                 <ButtonCTA>Generate with AI</ButtonCTA>
               </button>
             </div>
